@@ -11,9 +11,13 @@ model Productor {
   id             Int      @id @default(autoincrement())
   nombre         String
   dni            String   @db.VarChar(8)
+  tipo           TipoServicio @default(REGISTRO_APP)
   estado         EstadoProductor @default(EN_ESPERA)
   boxAsignadoId  Int?
   boxAsignado    Box?     @relation(fields: [boxAsignadoId], references: [id])
+  derivadoDeId   Int?
+  derivadoDe     Productor? @relation("DerivacionTurno", fields: [derivadoDeId], references: [id])
+  derivados      Productor[] @relation("DerivacionTurno")
   timestampEntrada DateTime @default(now())
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -22,6 +26,8 @@ model Productor {
 model Box {
   id          Int      @id @default(autoincrement())
   nombre      String
+  numero      Int?
+  tipo        TipoServicio @default(REGISTRO_APP)
   habilitado  Boolean  @default(true)
   operadorId  Int?
   operador    Usuario? @relation(fields: [operadorId], references: [id])
@@ -40,6 +46,11 @@ model Usuario {
 enum TipoUsuario {
   ADMIN
   OPERADOR
+}
+
+enum TipoServicio {
+  REGISTRO_APP
+  REGISTRO_INMUEBLE
 }
 
 enum EstadoProductor {

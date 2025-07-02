@@ -1,26 +1,82 @@
-import { PrismaClient, EstadoProductor } from "@prisma/client";
+import { PrismaClient, EstadoProductor, TipoServicio } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const ProductorService = {
   getAll: async () => {
-    return await prisma.productor.findMany({ include: { boxAsignado: true } });
+    return await prisma.productor.findMany({ 
+      include: { 
+        boxAsignado: true,
+        derivadoDe: true,
+        derivados: true
+      } 
+    });
   },
   create: async (data: any) => {
-    return await prisma.productor.create({ data });
+    return await prisma.productor.create({ 
+      data,
+      include: { 
+        boxAsignado: true,
+        derivadoDe: true,
+        derivados: true
+      }
+    });
   },
   update: async (id: number, data: any) => {
-    return await prisma.productor.update({ where: { id }, data });
+    return await prisma.productor.update({ 
+      where: { id }, 
+      data,
+      include: { 
+        boxAsignado: true,
+        derivadoDe: true,
+        derivados: true
+      }
+    });
   },
-  call: async (id: number, tipoLlamado: 'REGISTRO_APP' | 'REGISTRO_INMUEBLE') => {
+  call: async (id: number, tipoLlamado?: 'REGISTRO_APP' | 'REGISTRO_INMUEBLE') => {
+    // Obtener el productor para saber su tipo
+    const productor = await prisma.productor.findUnique({ where: { id } });
+    if (!productor) throw new Error('Productor no encontrado');
+    
     let nuevoEstado: EstadoProductor;
-    if (tipoLlamado === 'REGISTRO_APP') {
+    
+    // Si no se especifica tipo, usar el tipo del productor
+    const tipo = tipoLlamado || productor.tipo;
+    
+    if (tipo === 'REGISTRO_APP') {
       nuevoEstado = EstadoProductor.LLAMADO_REGISTRO_APP;
     } else {
       nuevoEstado = EstadoProductor.LLAMADO_REGISTRO_INMUEBLE;
     }
-    return await prisma.productor.update({ where: { id }, data: { estado: nuevoEstado } });
+    
+    return await prisma.productor.update({ 
+      where: { id }, 
+      data: { estado: nuevoEstado },
+      include: { 
+        boxAsignado: true,
+        derivadoDe: true,
+        derivados: true
+      }
+    });
   },
   finish: async (id: number) => {
-    return await prisma.productor.update({ where: { id }, data: { estado: EstadoProductor.FINALIZADO } });
+    return await prisma.productor.update({ 
+      where: { id }, 
+      data: { estado: EstadoProductor.FINALIZADO },
+      include: { 
+        boxAsignado: true,
+        derivadoDe: true,
+        derivados: true
+      }
+    });
+  },
+  getByTipo: async (tipo: TipoServicio) => {
+    return await prisma.productor.findMany({ 
+      where: { tipo },
+      include: { 
+        boxAsignado: true,
+        derivadoDe: true,
+        derivados: true
+      } 
+    });
   }
 };

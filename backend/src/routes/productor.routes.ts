@@ -5,17 +5,18 @@ import {
   updateProductor,
   callProductor,
   finishProductor,
+  derivarProductor,
 } from "../controllers/productor.controller";
-import { authMiddleware } from "../middlewares/auth.middleware";
 import { asyncHandler } from "../utils/asyncHandler";
 
 const router = Router();
 
 // Rutas
-router.get("/", authMiddleware, asyncHandler(getAllProductores));
+router.get("/", asyncHandler(getAllProductores));
 router.post("/", asyncHandler(createProductor)); // recepción, público
-router.put("/:id", authMiddleware, asyncHandler(updateProductor));
-router.post("/:id/call", authMiddleware, asyncHandler(callProductor));
-router.post("/:id/finish", authMiddleware, asyncHandler(finishProductor));
+router.put("/:id", asyncHandler(updateProductor));
+router.post("/:id/call", asyncHandler(callProductor));
+router.post("/:id/finish", asyncHandler(finishProductor));
+router.post("/:id/derivar", asyncHandler(derivarProductor));
 
 export default router;

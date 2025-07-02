@@ -1,1 +1,692 @@
- 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Turnos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 30px;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #4facfe;
+            border-bottom: 2px solid #4facfe;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4facfe;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+        }
+        
+        .list-item {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status.en-espera {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status.llamando {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status.atendiendo {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.finalizado {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .tipo-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        .tipo-app {
+            background: #667eea;
+            color: white;
+        }
+        
+        .tipo-inmueble {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .derivacion-badge {
+            background: #3498db;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 9px;
+            margin-top: 3px;
+        }
+        
+        .links-pantallas {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .links-pantallas h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+        
+        .link-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎫 Sistema de Turnos</h1>
+            <p>Gestión de colas y atención al cliente</p>
+        </div>
+        
+        <div class="content">
+            <div class="links-pantallas">
+                <h3>📺 Pantallas Públicas</h3>
+                <div class="link-item">
+                    <span>📱 Pantalla Registro APP</span>
+                    <a href="/display-app.html" target="_blank" class="btn">Ver Pantalla</a>
+                </div>
+                <div class="link-item">
+                    <span>🏠 Pantalla Registro Inmueble</span>
+                    <a href="/display-inmueble.html" target="_blank" class="btn">Ver Pantalla</a>
+                </div>
+                <div class="link-item">
+                    <span>📺 Pantalla General</span>
+                    <a href="/display.html" target="_blank" class="btn">Ver Pantalla</a>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('productores')">📋 Productores</button>
+                <button class="tab" onclick="showTab('boxes')">🏢 Cajas</button>
+                <button class="tab" onclick="showTab('usuarios')">👥 Usuarios</button>
+                <button class="tab" onclick="showTab('recepcion')">🎫 Recepción</button>
+            </div>
+            
+            <!-- Tab Productores -->
+            <div id="productores-tab" class="tab-content active">
+                <div class="card">
+                    <h3>🎫 Tomar Turno</h3>
+                    <form id="new-turn-form">
+                        <div class="form-group">
+                            <label for="tipo-turno">Tipo de Turno:</label>
+                            <select id="tipo-turno" name="tipo" required>
+                                <option value="">Seleccionar tipo</option>
+                                <option value="REGISTRO_APP">📱 Registro de APP</option>
+                                <option value="REGISTRO_INMUEBLE">🏠 Registro de Inmueble</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente-nombre">Nombre del Cliente:</label>
+                            <input type="text" id="cliente-nombre" name="nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cliente-cedula">Cédula:</label>
+                            <input type="text" id="cliente-cedula" name="cedula" required>
+                        </div>
+                        <button type="submit" class="btn">🎫 Generar Turno</button>
+                    </form>
+                </div>
+                
+                <div class="card">
+                    <h3>📋 Lista de Turnos</h3>
+                    <div id="productores-list"></div>
+                </div>
+            </div>
+            
+            <!-- Tab Cajas -->
+            <div id="boxes-tab" class="tab-content">
+                <div class="card">
+                    <h3>➕ Nueva Caja</h3>
+                    <form id="new-box-form">
+                        <div class="form-group">
+                            <label for="box-numero">Número de Caja:</label>
+                            <input type="number" id="box-numero" name="numero" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="box-tipo">Tipo de Servicio:</label>
+                            <select id="box-tipo" name="tipo" required>
+                                <option value="">Seleccionar tipo</option>
+                                <option value="REGISTRO_APP">📱 Registro de APP</option>
+                                <option value="REGISTRO_INMUEBLE">🏠 Registro de Inmueble</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn">➕ Crear Caja</button>
+                    </form>
+                </div>
+                
+                <div class="card">
+                    <h3>🏢 Cajas Disponibles</h3>
+                    <div id="boxes-list"></div>
+                </div>
+            </div>
+            
+            <!-- Tab Usuarios -->
+            <div id="usuarios-tab" class="tab-content">
+                <div class="card">
+                    <h3>➕ Nuevo Usuario</h3>
+                    <form id="new-user-form">
+                        <div class="form-group">
+                            <label for="user-nombre">Nombre:</label>
+                            <input type="text" id="user-nombre" name="nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-email">Email:</label>
+                            <input type="email" id="user-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-password">Contraseña:</label>
+                            <input type="password" id="user-password" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-rol">Rol:</label>
+                            <select id="user-rol" name="rol" required>
+                                <option value="">Seleccionar rol</option>
+                                <option value="ADMIN">👑 Administrador</option>
+                                <option value="OPERADOR">👨‍💼 Operador</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn">➕ Crear Usuario</button>
+                    </form>
+                </div>
+                
+                <div class="card">
+                    <h3>👥 Lista de Usuarios</h3>
+                    <div id="usuarios-list"></div>
+                </div>
+            </div>
+            
+            <!-- Tab Recepción -->
+            <div id="recepcion-tab" class="tab-content">
+                <div class="card">
+                    <h3>🎯 Panel de Control</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <div class="list-item">
+                            <span>🔄 En Espera APP</span>
+                            <span id="count-espera-app" class="status en-espera">0</span>
+                        </div>
+                        <div class="list-item">
+                            <span>🔄 En Espera INMUEBLE</span>
+                            <span id="count-espera-inmueble" class="status en-espera">0</span>
+                        </div>
+                        <div class="list-item">
+                            <span>📢 Llamando</span>
+                            <span id="count-llamando" class="status llamando">0</span>
+                        </div>
+                        <div class="list-item">
+                            <span>✔️ Finalizados</span>
+                            <span id="count-finalizado" class="status finalizado">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        
+        // Cargar datos al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+        });
+        
+        function showTab(tabName) {
+            // Ocultar todas las tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            const tabButtons = document.querySelectorAll('.tab');
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Mostrar tab seleccionada
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+            
+            // Cargar datos específicos
+            loadData();
+        }
+        
+        async function loadData() {
+            await loadProductores();
+            await loadBoxes();
+            await loadUsuarios();
+            updateCounts();
+        }
+        
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const config = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            if (data) {
+                config.body = JSON.stringify(data);
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, config);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+        
+        async function loadProductores() {
+            try {
+                const productores = await apiCall('/productor');
+                const container = document.getElementById('productores-list');
+                container.innerHTML = '';
+                
+                productores.forEach(p => {
+                    const item = document.createElement('div');
+                    item.className = 'list-item';
+                    
+                    const tipoClass = p.tipo === 'REGISTRO_APP' ? 'tipo-app' : 'tipo-inmueble';
+                    const tipoIcon = p.tipo === 'REGISTRO_APP' ? '📱' : '🏠';
+                    
+                    let derivacionInfo = '';
+                    if (p.derivadoDe) {
+                        derivacionInfo = '<div class="derivacion-badge">Derivado</div>';
+                    }
+                    
+                    let botones = '';
+                    if (p.estado === 'EN_ESPERA') {
+                        botones = `<button onclick="callProductor(${p.id})" class="btn">📢 Llamar</button>`;
+                    } else if (p.estado.includes('LLAMADO') || p.estado.includes('REGISTRADO')) {
+                        botones = `<button onclick="finishProductor(${p.id})" class="btn btn-success">✅ Finalizar</button>`;
+                        
+                        // Solo mostrar botón derivar si es turno de APP y está siendo atendido
+                        if (p.tipo === 'REGISTRO_APP' && !p.derivados?.length) {
+                            botones += `<button onclick="derivarProductor(${p.id})" class="btn btn-warning">🔄 Derivar a Inmueble</button>`;
+                        }
+                    }
+                    
+                    item.innerHTML = `
+                        <div>
+                            <strong>🎫 #${p.id}</strong> - ${p.nombre}
+                            <span class="tipo-badge ${tipoClass}">${tipoIcon} ${p.tipo.replace('REGISTRO_', '')}</span>
+                            <br><small>Cédula: ${p.dni} | Estado: ${p.estado}</small>
+                            ${derivacionInfo}
+                        </div>
+                        <div>
+                            <span class="status ${p.estado.toLowerCase().replace('_', '-')}">${p.estado}</span>
+                            ${botones}
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Error loading productores:', error);
+            }
+        }
+        
+        async function loadBoxes() {
+            try {
+                const boxes = await apiCall('/box');
+                const container = document.getElementById('boxes-list');
+                container.innerHTML = '';
+                
+                boxes.forEach(box => {
+                    const tipoClass = box.tipo === 'REGISTRO_APP' ? 'tipo-app' : 'tipo-inmueble';
+                    const tipoIcon = box.tipo === 'REGISTRO_APP' ? '📱' : '🏠';
+                    
+                    const item = document.createElement('div');
+                    item.className = 'list-item';
+                    item.innerHTML = `
+                        <div>
+                            <strong>🏢 ${box.nombre}</strong>
+                            <span class="tipo-badge ${tipoClass}">${tipoIcon} ${box.tipo.replace('REGISTRO_', '')}</span>
+                            <br><small>Número: ${box.numero || 'N/A'}</small>
+                        </div>
+                        <div>
+                            <span class="status ${box.habilitado ? 'atendiendo' : 'en-espera'}">${box.habilitado ? 'Habilitada' : 'Deshabilitada'}</span>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Error loading boxes:', error);
+            }
+        }
+        
+        async function loadUsuarios() {
+            try {
+                const usuarios = await apiCall('/usuario');
+                const container = document.getElementById('usuarios-list');
+                container.innerHTML = '';
+                
+                usuarios.forEach(user => {
+                    const item = document.createElement('div');
+                    item.className = 'list-item';
+                    item.innerHTML = `
+                        <div>
+                            <strong>👤 ${user.nombre}</strong>
+                            <br><small>Email: ${user.email} | Tipo: ${user.tipo}</small>
+                        </div>
+                        <div>
+                            <span class="status atendiendo">${user.tipo}</span>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Error loading usuarios:', error);
+            }
+        }
+        
+        function updateCounts() {
+            // Actualizar contadores basado en los datos cargados
+            const productores = document.querySelectorAll('#productores-list .list-item');
+            let esperaApp = 0, esperaInmueble = 0, llamando = 0, finalizado = 0;
+            
+            productores.forEach(item => {
+                const texto = item.textContent;
+                if (texto.includes('EN_ESPERA')) {
+                    if (texto.includes('APP')) esperaApp++;
+                    else if (texto.includes('INMUEBLE')) esperaInmueble++;
+                } else if (texto.includes('LLAMADO')) {
+                    llamando++;
+                } else if (texto.includes('FINALIZADO')) {
+                    finalizado++;
+                }
+            });
+            
+            document.getElementById('count-espera-app').textContent = esperaApp;
+            document.getElementById('count-espera-inmueble').textContent = esperaInmueble;
+            document.getElementById('count-llamando').textContent = llamando;
+            document.getElementById('count-finalizado').textContent = finalizado;
+        }
+        
+        // Event listeners para formularios
+        document.getElementById('new-turn-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                nombre: formData.get('nombre'),
+                dni: formData.get('cedula'),
+                tipo: formData.get('tipo')
+            };
+            
+            try {
+                await apiCall('/productor', 'POST', data);
+                e.target.reset();
+                await loadProductores();
+                showSuccess('Turno generado exitosamente');
+            } catch (error) {
+                showError('Error al generar turno');
+            }
+        });
+        
+        document.getElementById('new-box-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                numero: parseInt(formData.get('numero')),
+                nombre: `Caja ${formData.get('numero')}`,
+                tipo: formData.get('tipo')
+            };
+            
+            try {
+                await apiCall('/box', 'POST', data);
+                e.target.reset();
+                await loadBoxes();
+                showSuccess('Caja creada exitosamente');
+            } catch (error) {
+                showError('Error al crear caja');
+            }
+        });
+        
+        document.getElementById('new-user-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {
+                nombre: formData.get('nombre'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                tipo: formData.get('rol')
+            };
+            
+            try {
+                await apiCall('/usuario', 'POST', data);
+                e.target.reset();
+                await loadUsuarios();
+                showSuccess('Usuario creado exitosamente');
+            } catch (error) {
+                showError('Error al crear usuario');
+            }
+        });
+        
+        async function callProductor(id) {
+            try {
+                await apiCall(`/productor/${id}/call`, 'POST');
+                await loadProductores();
+                showSuccess('Productor llamado exitosamente');
+            } catch (error) {
+                showError('Error al llamar productor');
+            }
+        }
+        
+        async function finishProductor(id) {
+            try {
+                await apiCall(`/productor/${id}/finish`, 'POST');
+                await loadProductores();
+                showSuccess('Turno finalizado exitosamente');
+            } catch (error) {
+                showError('Error al finalizar turno');
+            }
+        }
+        
+        async function derivarProductor(id) {
+            if (confirm('¿Derivar este turno a REGISTRO_INMUEBLE?')) {
+                try {
+                    const result = await apiCall(`/productor/${id}/derivar`, 'POST');
+                    await loadProductores();
+                    showSuccess(`Turno derivado exitosamente. Nuevo turno #${result.nuevo.id} creado para REGISTRO_INMUEBLE`);
+                } catch (error) {
+                    showError('Error al derivar turno');
+                }
+            }
+        }
+        
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.body.appendChild(errorDiv);
+            setTimeout(() => document.body.removeChild(errorDiv), 5000);
+        }
+        
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+            document.body.appendChild(successDiv);
+            setTimeout(() => document.body.removeChild(successDiv), 3000);
+        }
+        
+        // Actualizar datos cada 30 segundos
+        setInterval(loadData, 30000);
+    </script>
+</body>
+</html> 

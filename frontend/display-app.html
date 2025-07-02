@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pantalla Registro APP - Sistema de Turnos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.8rem;
+            opacity: 0.9;
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+            height: calc(100vh - 120px);
+        }
+        
+        .section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .llamando {
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .esperando {
+            border-left: 5px solid #f39c12;
+        }
+        
+        .turno-item {
+            background: rgba(255,255,255,0.9);
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .turno-item:hover {
+            transform: translateY(-2px);
+        }
+        
+        .turno-info {
+            flex: 1;
+        }
+        
+        .turno-numero {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .turno-nombre {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .turno-dni {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .turno-box {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .turno-box.llamando {
+            background: #e74c3c;
+            animation: pulsar 1.5s infinite;
+        }
+        
+        .derivacion-info {
+            background: #3498db;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        @keyframes pulsar {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .empty-message {
+            text-align: center;
+            font-size: 1.5rem;
+            color: rgba(255,255,255,0.7);
+            padding: 40px;
+            font-style: italic;
+        }
+        
+        .scroll-content {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) transparent;
+        }
+        
+        .scroll-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .scroll-content::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        
+        .scroll-content::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+        }
+        
+        .timestamp {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+        }
+        
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #27ae60;
+            animation: latido 2s infinite;
+        }
+        
+        @keyframes latido {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .tipo-badge {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #667eea;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="status-indicator" title="Sistema conectado"></div>
+    <div class="tipo-badge">📱 REGISTRO APP</div>
+    
+    <div class="header">
+        <h1>📱 Sistema de Turnos</h1>
+        <p>REGISTRO DE APLICACIONES</p>
+    </div>
+    
+    <div class="main-content">
+        <!-- Turnos Llamando -->
+        <div class="section llamando">
+            <h2>🔔 LLAMANDO AHORA</h2>
+            <div class="scroll-content" id="turnos-llamando">
+                <div class="empty-message">No hay turnos siendo llamados</div>
+            </div>
+        </div>
+        
+        <!-- Turnos En Espera -->
+        <div class="section esperando">
+            <h2>⏳ EN ESPERA</h2>
+            <div class="scroll-content" id="turnos-espera">
+                <div class="empty-message">No hay turnos en espera</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="timestamp" id="timestamp"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        
+        // Actualizar timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('es-ES', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('timestamp').textContent = timeString;
+        }
+        
+        // Obtener últimos 3 dígitos del DNI
+        function getLastThreeDigits(dni) {
+            if (!dni) return '***';
+            const dniStr = dni.toString();
+            return dniStr.length >= 3 ? '***' + dniStr.slice(-3) : '***' + dniStr;
+        }
+        
+        // Crear elemento de turno
+        function createTurnoElement(turno, isLlamando = false) {
+            const div = document.createElement('div');
+            div.className = 'turno-item';
+            
+            // Determinar el box o botón de llamar/derivar
+            let boxInfo = '';
+            if (turno.boxAsignado) {
+                boxInfo = `<div class="turno-box ${isLlamando ? 'llamando' : ''}">Caja ${turno.boxAsignado.numero || turno.boxAsignado.id}</div>`;
+            } else if (turno.boxAsignadoId) {
+                boxInfo = `<div class="turno-box ${isLlamando ? 'llamando' : ''}">Caja ${turno.boxAsignadoId}</div>`;
+            } else if (turno.estado === 'EN_ESPERA') {
+                boxInfo = `<button onclick="llamarTurno(${turno.id})" class="turno-box" style="background: #27ae60; cursor: pointer; border: none;">📢 Llamar</button>`;
+            } else if (isLlamando && turno.tipo === 'REGISTRO_APP') {
+                // Si está llamando y es de tipo APP, mostrar botón de derivar
+                boxInfo = `<button onclick="derivarTurno(${turno.id})" class="turno-box" style="background: #f39c12; cursor: pointer; border: none;">🔄 Derivar a Inmueble</button>`;
+            } else {
+                boxInfo = `<div class="turno-box ${isLlamando ? 'llamando' : ''}">Sin asignar</div>`;
+            }
+            
+            // Información de derivación
+            let derivacionInfo = '';
+            if (turno.derivadoDe) {
+                derivacionInfo = '<div class="derivacion-info">Derivado de turno anterior</div>';
+            }
+            
+            div.innerHTML = `
+                <div class="turno-info">
+                    <div class="turno-numero">Turno #${turno.id}</div>
+                    <div class="turno-nombre">${turno.nombre}</div>
+                    <div class="turno-dni">DNI: ${getLastThreeDigits(turno.dni)}</div>
+                    ${derivacionInfo}
+                </div>
+                ${boxInfo}
+            `;
+            
+            return div;
+        }
+        
+        // Cargar y mostrar turnos
+        async function loadTurnos() {
+            try {
+                const response = await fetch(`${API_BASE}/productor`);
+                if (!response.ok) throw new Error('Error al cargar turnos');
+                
+                const turnos = await response.json();
+                
+                // Filtrar solo turnos de REGISTRO_APP
+                const turnosApp = turnos.filter(t => t.tipo === 'REGISTRO_APP');
+                
+                const turnosLlamando = turnosApp.filter(t => 
+                    t.estado && t.estado.includes('LLAMADO_REGISTRO_APP')
+                );
+                const turnosEspera = turnosApp.filter(t => 
+                    t.estado === 'EN_ESPERA'
+                );
+                
+                // Actualizar sección de llamando
+                const llamandoContainer = document.getElementById('turnos-llamando');
+                if (turnosLlamando.length > 0) {
+                    llamandoContainer.innerHTML = '';
+                    turnosLlamando.forEach(turno => {
+                        llamandoContainer.appendChild(createTurnoElement(turno, true));
+                    });
+                } else {
+                    llamandoContainer.innerHTML = '<div class="empty-message">No hay turnos siendo llamados</div>';
+                }
+                
+                // Actualizar sección de espera
+                const esperaContainer = document.getElementById('turnos-espera');
+                if (turnosEspera.length > 0) {
+                    esperaContainer.innerHTML = '';
+                    turnosEspera.slice(0, 10).forEach(turno => {
+                        esperaContainer.appendChild(createTurnoElement(turno, false));
+                    });
+                } else {
+                    esperaContainer.innerHTML = '<div class="empty-message">No hay turnos en espera</div>';
+                }
+                
+                // Actualizar indicador de conexión
+                document.querySelector('.status-indicator').style.background = '#27ae60';
+                
+            } catch (error) {
+                console.error('Error loading turnos:', error);
+                
+                // Indicar error de conexión
+                document.querySelector('.status-indicator').style.background = '#e74c3c';
+                
+                // Mostrar mensaje de error
+                document.getElementById('turnos-llamando').innerHTML = 
+                    '<div class="empty-message">Error de conexión</div>';
+                document.getElementById('turnos-espera').innerHTML = 
+                    '<div class="empty-message">Error de conexión</div>';
+            }
+        }
+        
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTimestamp();
+            loadTurnos();
+            
+            // Actualizar cada 5 segundos
+            setInterval(() => {
+                updateTimestamp();
+                loadTurnos();
+            }, 5000);
+        });
+        
+        // Función para llamar turno desde la pantalla pública
+        async function llamarTurno(id) {
+            try {
+                const response = await fetch(`${API_BASE}/productor/${id}/call`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    // Recargar datos inmediatamente
+                    await loadTurnos();
+                    console.log('Turno llamado exitosamente');
+                } else {
+                    console.error('Error al llamar turno');
+                }
+            } catch (error) {
+                console.error('Error calling turno:', error);
+            }
+        }
+        
+        // Función para derivar turno desde la pantalla pública
+        async function derivarTurno(id) {
+            try {
+                const response = await fetch(`${API_BASE}/productor/${id}/derivar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    // Recargar datos inmediatamente
+                    await loadTurnos();
+                    console.log('Turno derivado exitosamente a REGISTRO_INMUEBLE');
+                } else {
+                    console.error('Error al derivar turno');
+                }
+            } catch (error) {
+                console.error('Error derivando turno:', error);
+            }
+        }
+    </script>
+</body>
+</html> 

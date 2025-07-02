@@ -66,3 +66,29 @@ export const finishProductor = async (
     next(error);
   }
 };
+
+export const derivarProductor = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const productorOriginal = await ProductorService.finish(Number(req.params.id));
+    
+    // Crear nuevo turno para REGISTRO_INMUEBLE
+    const nuevoTurno = await ProductorService.create({
+      nombre: productorOriginal.nombre,
+      dni: productorOriginal.dni,
+      tipo: 'REGISTRO_INMUEBLE',
+      derivadoDeId: productorOriginal.id
+    });
+    
+    res.json({
+      original: productorOriginal,
+      nuevo: nuevoTurno,
+      message: 'Turno derivado exitosamente a REGISTRO_INMUEBLE'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
