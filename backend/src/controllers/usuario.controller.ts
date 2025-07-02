@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { UsuarioService } from "../services/usuario.service";
 
-export const getAllUsuarios = async (req: Request, res: Response, next: NextFunction) => {
+export const getAllUsuarios = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const usuarios = await UsuarioService.getAll();
     res.json(usuarios);
@@ -10,7 +14,11 @@ export const getAllUsuarios = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const createUsuario = async (req: Request, res: Response, next: NextFunction) => {
+export const createUsuario = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const usuario = await UsuarioService.create(req.body);
     res.status(201).json(usuario);

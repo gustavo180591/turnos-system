@@ -2,9 +2,27 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+# Install system dependencies for Prisma
+RUN apk add --no-cache openssl python3 make g++
 
+# Copy package files
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Install all dependencies including devDependencies
+RUN npm install --include=dev
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Copy source files
 COPY . .
 
-CMD ["npm", "run", "start"]
+# Build the application
+RUN npm run build
+
+# Install only production dependencies
+RUN npm ci --only=production
+
+# Command to run the application
+CMD ["node", "dist/server.js"]

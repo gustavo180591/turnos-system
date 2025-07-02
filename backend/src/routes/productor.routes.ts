@@ -7,13 +7,15 @@ import {
   finishProductor,
 } from "../controllers/productor.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
+import { asyncHandler } from "../utils/asyncHandler";
 
 const router = Router();
 
-router.get("/", authMiddleware, getAllProductores);
-router.post("/", createProductor); // recepción, público
-router.put("/:id", authMiddleware, updateProductor);
-router.post("/:id/call", authMiddleware, callProductor);
-router.post("/:id/finish", authMiddleware, finishProductor);
+// Rutas
+router.get("/", authMiddleware, asyncHandler(getAllProductores));
+router.post("/", asyncHandler(createProductor)); // recepción, público
+router.put("/:id", authMiddleware, asyncHandler(updateProductor));
+router.post("/:id/call", authMiddleware, asyncHandler(callProductor));
+router.post("/:id/finish", authMiddleware, asyncHandler(finishProductor));
 
 export default router;
