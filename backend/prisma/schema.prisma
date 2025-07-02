@@ -1,0 +1,53 @@
+// backend/prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Productor {
+  id             Int      @id @default(autoincrement())
+  nombre         String
+  dni            String   @db.VarChar(8)
+  estado         EstadoProductor @default(EN_ESPERA)
+  boxAsignadoId  Int?
+  boxAsignado    Box?     @relation(fields: [boxAsignadoId], references: [id])
+  timestampEntrada DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Box {
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  habilitado  Boolean  @default(true)
+  operadorId  Int?
+  operador    Usuario? @relation(fields: [operadorId], references: [id])
+  productores Productor[]
+}
+
+model Usuario {
+  id          Int      @id @default(autoincrement())
+  nombre      String
+  email       String   @unique
+  password    String
+  tipo        TipoUsuario
+  box         Box[]
+}
+
+enum TipoUsuario {
+  ADMIN
+  OPERADOR
+}
+
+enum EstadoProductor {
+  EN_ESPERA
+  LLAMADO_REGISTRO_APP
+  REGISTRADO_APP
+  LLAMADO_REGISTRO_INMUEBLE
+  REGISTRADO_INMUEBLE
+  FINALIZADO
+}
