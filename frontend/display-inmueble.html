@@ -271,7 +271,20 @@
             } else if (turno.boxAsignadoId) {
                 boxInfo = `<div class="turno-box ${isLlamando ? 'llamando' : ''}">Caja ${turno.boxAsignadoId}</div>`;
             } else if (turno.estado === 'EN_ESPERA') {
-                boxInfo = `<button onclick="llamarTurno(${turno.id})" class="turno-box" style="background: #27ae60; cursor: pointer; border: none;">📢 Llamar</button>`;
+                boxInfo = `
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button onclick="llamarTurno(${turno.id})" class="turno-box" style="background: #27ae60; cursor: pointer; border: none;">📢 Llamar</button>
+                        <button onclick="eliminarTurno(${turno.id})" class="turno-box" style="background: #e74c3c; cursor: pointer; border: none;">🗑️ Eliminar</button>
+                    </div>
+                `;
+            } else if (isLlamando) {
+                // Si está siendo llamado, mostrar botón de finalizar
+                boxInfo = `
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button onclick="finalizarTurno(${turno.id})" class="turno-box" style="background: #e74c3c; cursor: pointer; border: none;">✅ Finalizar</button>
+                        <button onclick="eliminarTurno(${turno.id})" class="turno-box" style="background: #e74c3c; cursor: pointer; border: none;">🗑️ Eliminar</button>
+                    </div>
+                `;
             } else {
                 boxInfo = `<div class="turno-box ${isLlamando ? 'llamando' : ''}">Sin asignar</div>`;
             }
@@ -383,6 +396,56 @@
                 }
             } catch (error) {
                 console.error('Error calling turno:', error);
+            }
+        }
+        
+        // Función para finalizar turno
+        async function finalizarTurno(id) {
+            try {
+                const response = await fetch(`${API_BASE}/productor/${id}/finish`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    // Recargar datos inmediatamente
+                    await loadTurnos();
+                    console.log('Turno finalizado exitosamente');
+                } else {
+                    console.error('Error al finalizar turno');
+                }
+            } catch (error) {
+                console.error('Error finalizando turno:', error);
+            }
+        }
+        
+        // Función para eliminar turno
+        async function eliminarTurno(id) {
+            if (!confirm('¿Está seguro de que desea eliminar este turno?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/productor/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    // Recargar datos inmediatamente
+                    await loadTurnos();
+                    console.log('Turno eliminado exitosamente');
+                } else {
+                    console.error('Error al eliminar turno');
+                    alert('Error al eliminar el turno. Por favor intente nuevamente.');
+                }
+            } catch (error) {
+                console.error('Error eliminando turno:', error);
+                alert('Error de conexión. Por favor intente nuevamente.');
             }
         }
     </script>

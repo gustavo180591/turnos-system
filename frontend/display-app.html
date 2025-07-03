@@ -207,6 +207,111 @@
             font-size: 1.2rem;
             font-weight: bold;
         }
+        
+        .crear-turno-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .crear-turno-btn:hover {
+            transform: translateY(-2px);
+            background: #2ecc71;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            width: 500px;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: #000;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .submit-btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background: #764ba2;
+        }
+        
+        .modal h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -237,6 +342,27 @@
     </div>
     
     <div class="timestamp" id="timestamp"></div>
+    
+    <button class="crear-turno-btn" onclick="abrirModalCrearTurno()">➕ Crear Turno</button>
+    
+    <!-- Modal para crear turno -->
+    <div id="modalCrearTurno" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalCrearTurno()">&times;</span>
+            <h2>📱 Crear Nuevo Turno - Registro APP</h2>
+            <form id="formCrearTurno" onsubmit="crearTurno(event)">
+                <div class="form-group">
+                    <label for="nombre">Nombre Completo:</label>
+                    <input type="text" id="nombre" name="nombre" required placeholder="Ingrese el nombre completo">
+                </div>
+                <div class="form-group">
+                    <label for="dni">DNI:</label>
+                    <input type="text" id="dni" name="dni" required placeholder="Ingrese el DNI" pattern="[0-9]+">
+                </div>
+                <button type="submit" class="submit-btn">Crear Turno</button>
+            </form>
+        </div>
+    </div>
 
     <script>
         const API_BASE = 'http://localhost:3000/api';
@@ -271,10 +397,20 @@
             } else if (turno.boxAsignadoId) {
                 boxInfo = `<div class="turno-box ${isLlamando ? 'llamando' : ''}">Caja ${turno.boxAsignadoId}</div>`;
             } else if (turno.estado === 'EN_ESPERA') {
-                boxInfo = `<button onclick="llamarTurno(${turno.id})" class="turno-box" style="background: #27ae60; cursor: pointer; border: none;">📢 Llamar</button>`;
+                boxInfo = `
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button onclick="llamarTurno(${turno.id})" class="turno-box" style="background: #27ae60; cursor: pointer; border: none;">📢 Llamar</button>
+                        <button onclick="eliminarTurno(${turno.id})" class="turno-box" style="background: #e74c3c; cursor: pointer; border: none;">🗑️ Eliminar</button>
+                    </div>
+                `;
             } else if (isLlamando && turno.tipo === 'REGISTRO_APP') {
                 // Si está llamando y es de tipo APP, mostrar botón de derivar
-                boxInfo = `<button onclick="derivarTurno(${turno.id})" class="turno-box" style="background: #f39c12; cursor: pointer; border: none;">🔄 Derivar a Inmueble</button>`;
+                boxInfo = `
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button onclick="derivarTurno(${turno.id})" class="turno-box" style="background: #f39c12; cursor: pointer; border: none;">🔄 Derivar a Inmueble</button>
+                        <button onclick="eliminarTurno(${turno.id})" class="turno-box" style="background: #e74c3c; cursor: pointer; border: none;">🗑️ Eliminar</button>
+                    </div>
+                `;
             } else {
                 boxInfo = `<div class="turno-box ${isLlamando ? 'llamando' : ''}">Sin asignar</div>`;
             }
@@ -408,6 +544,97 @@
                 }
             } catch (error) {
                 console.error('Error derivando turno:', error);
+            }
+        }
+        
+        // Funciones para el modal
+        function abrirModalCrearTurno() {
+            document.getElementById('modalCrearTurno').style.display = 'block';
+            // Limpiar el formulario
+            document.getElementById('formCrearTurno').reset();
+            // Enfocar en el primer campo
+            document.getElementById('nombre').focus();
+        }
+        
+        function cerrarModalCrearTurno() {
+            document.getElementById('modalCrearTurno').style.display = 'none';
+        }
+        
+        // Cerrar modal al hacer clic fuera de él
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalCrearTurno');
+            if (event.target == modal) {
+                cerrarModalCrearTurno();
+            }
+        }
+        
+        // Función para crear turno
+        async function crearTurno(event) {
+            event.preventDefault();
+            
+            const formData = {
+                nombre: document.getElementById('nombre').value,
+                dni: document.getElementById('dni').value,
+                tipo: 'REGISTRO_APP'
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/productor`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    const nuevoTurno = await response.json();
+                    console.log('Turno creado exitosamente:', nuevoTurno);
+                    
+                    // Cerrar modal
+                    cerrarModalCrearTurno();
+                    
+                    // Recargar turnos inmediatamente
+                    await loadTurnos();
+                    
+                    // Mostrar mensaje de éxito (opcional)
+                    alert(`Turno #${nuevoTurno.id} creado exitosamente para ${nuevoTurno.nombre}`);
+                } else {
+                    const error = await response.json();
+                    console.error('Error al crear turno:', error);
+                    alert('Error al crear el turno. Por favor intente nuevamente.');
+                }
+            } catch (error) {
+                console.error('Error creando turno:', error);
+                alert('Error de conexión. Por favor intente nuevamente.');
+            }
+        }
+        
+        // Función para eliminar turno
+        async function eliminarTurno(id) {
+            if (!confirm('¿Está seguro de que desea eliminar este turno?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/productor/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    // Recargar datos inmediatamente
+                    await loadTurnos();
+                    console.log('Turno eliminado exitosamente');
+                } else {
+                    console.error('Error al eliminar turno');
+                    alert('Error al eliminar el turno. Por favor intente nuevamente.');
+                }
+            } catch (error) {
+                console.error('Error eliminando turno:', error);
+                alert('Error de conexión. Por favor intente nuevamente.');
             }
         }
     </script>

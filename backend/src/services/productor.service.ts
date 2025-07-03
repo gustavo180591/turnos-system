@@ -78,5 +78,29 @@ export const ProductorService = {
         derivados: true
       } 
     });
+  },
+  delete: async (id: number) => {
+    // Primero verificar si existe
+    const productor = await prisma.productor.findUnique({ 
+      where: { id },
+      include: { derivados: true }
+    });
+    
+    if (!productor) {
+      throw new Error('Productor no encontrado');
+    }
+    
+    // Si tiene turnos derivados, actualizar sus referencias
+    if (productor.derivados.length > 0) {
+      await prisma.productor.updateMany({
+        where: { derivadoDeId: id },
+        data: { derivadoDeId: null }
+      });
+    }
+    
+    // Ahora sí eliminar el productor
+    return await prisma.productor.delete({ 
+      where: { id } 
+    });
   }
 };

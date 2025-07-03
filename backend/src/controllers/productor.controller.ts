@@ -92,3 +92,16 @@ export const derivarProductor = async (
     next(error);
   }
 };
+
+export const deleteProductor = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    await ProductorService.delete(Number(req.params.id));
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};

@@ -24,5 +24,5 @@ RUN npm run build
 # Install only production dependencies
 RUN npm ci --only=production
 
-# Command to run the application
-CMD ["node", "dist/server.js"]
+# Run Prisma migrations before starting the app
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]

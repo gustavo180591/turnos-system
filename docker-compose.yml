@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: turnos_db
     ports:
-      - "5433:5432"
+      - "5434:5432"
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
   backend:
@@ -24,3 +24,11 @@ services:
       - ./backend:/app
       - /app/node_modules
     working_dir: /app
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    depends_on:
+      - backend

@@ -445,6 +445,12 @@
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                
+                // Si es 204 No Content, no intentar parsear JSON
+                if (response.status === 204) {
+                    return null;
+                }
+                
                 return await response.json();
             } catch (error) {
                 console.error('API Error:', error);
@@ -481,6 +487,9 @@
                             botones += `<button onclick="derivarProductor(${p.id})" class="btn btn-warning">🔄 Derivar a Inmueble</button>`;
                         }
                     }
+                    
+                    // Agregar botón eliminar para todos los turnos
+                    botones += `<button onclick="deleteProductor(${p.id})" class="btn btn-danger">🗑️ Eliminar</button>`;
                     
                     item.innerHTML = `
                         <div>
@@ -665,6 +674,18 @@
                     showSuccess(`Turno derivado exitosamente. Nuevo turno #${result.nuevo.id} creado para REGISTRO_INMUEBLE`);
                 } catch (error) {
                     showError('Error al derivar turno');
+                }
+            }
+        }
+        
+        async function deleteProductor(id) {
+            if (confirm('¿Está seguro de que desea eliminar este turno?')) {
+                try {
+                    await apiCall(`/productor/${id}`, 'DELETE');
+                    await loadProductores();
+                    showSuccess('Turno eliminado exitosamente');
+                } catch (error) {
+                    showError('Error al eliminar turno');
                 }
             }
         }

@@ -6,6 +6,7 @@ import {
   callProductor,
   finishProductor,
   derivarProductor,
+  deleteProductor,
 } from "../controllers/productor.controller";
 import { asyncHandler } from "../utils/asyncHandler";
 
@@ -18,5 +19,6 @@ router.put("/:id", asyncHandler(updateProductor));
 router.post("/:id/call", asyncHandler(callProductor));
 router.post("/:id/finish", asyncHandler(finishProductor));
 router.post("/:id/derivar", asyncHandler(derivarProductor));
+router.delete("/:id", asyncHandler(deleteProductor));
 
 export default router;
